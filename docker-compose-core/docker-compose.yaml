@@ -107,7 +107,7 @@ services:
 
       #! ROUTER: 9000 [80, 443].
       - traefik.http.services.frontend-http.loadbalancer.server.port=9000
-      - traefik.http.services.frontend-https.loadbalance.server.port=9443
+      - traefik.http.services.frontend-https.loadbalancer.server.port=9443
       #? HTTP
       - traefik.http.routers.frontend-http.entrypoints=http
       - traefik.http.routers.frontend-http.rule=Host(`${PORTAINER_9000_HTTP?PORTAINER_9000_HTTP not set}`)
