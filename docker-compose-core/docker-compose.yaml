@@ -106,7 +106,8 @@ services:
       - traefik.http.routers.edge-https.tls.certresolver=${PORTAINER_8000_SSL?PORTAINER_8000_SSL not set}
 
       #! ROUTER: 9000 [80, 443].
-      - traefik.http.services.frontend.loadbalancer.server.port=9000
+      - traefik.http.services.frontend-http.loadbalancer.server.port=9000
+      - traefik.http.services.frontend-https.loadbalance.server.port=9443
       #? HTTP
       - traefik.http.routers.frontend-http.entrypoints=http
       - traefik.http.routers.frontend-http.rule=Host(`${PORTAINER_9000_HTTP?PORTAINER_9000_HTTP not set}`)
