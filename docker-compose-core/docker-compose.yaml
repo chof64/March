@@ -34,11 +34,9 @@ services:
       #? Access Logs
       - --accesslog.filepath=/traefik/access.log
       - --accesslog.format=json
-      - --accesslog.bufferingsize=50
       #? Error Logs
       - --log.filepath=/traefik/error.log
       - --log.format=json
-      - --log.bufferingsize=50
 
     environment:
       - CF_API_EMAIL=${CF_API_EMAIL?CF_API_EMAIL not set}
