@@ -4,8 +4,8 @@ services:
     image: traefik:v2.9
     command:
       #! ENTRYPOINT
-      - --entrypoints.http.address=:80
-      - --entrypoints.https.address=:443
+      - --entrypoints.webunsecure.address=:80
+      - --entrypoints.websecure.address=:443
 
       #! PROVIDERS
       - --providers.docker
@@ -51,14 +51,14 @@ services:
       #! ROUTER: [dashboard] 8080: Traefik API/Dashboard
       traefik.http.services.dashboard.loadbalancer.server.port: 8080
       #? HTTP
-      traefik.http.routers.dashboard-http.entrypoints: http
+      # traefik.http.routers.dashboard-http.entrypoints: http
       traefik.http.routers.dashboard-http.rule: Host(`${TRAEFIK_8080_DOMAIN?TRAEFIK_8080_DOMAIN not set}`)
       #? HTTPS
-      traefik.http.routers.dashboard-https.entrypoints: https
-      traefik.http.routers.dashboard-https.rule: Host(`${TRAEFIK_8080_DOMAIN?TRAEFIK_8080_DOMAIN not set}`)
+      # traefik.http.routers.dashboard-https.entrypoints: https
+      # traefik.http.routers.dashboard-https.rule: Host(`${TRAEFIK_8080_DOMAIN?TRAEFIK_8080_DOMAIN not set}`)
       #? SSL/TSL
-      traefik.http.routers.dashboard-https.tls: true
-      traefik.http.routers.dashboard-https.tls.certrosolver: ${TRAEFIK_8080_SSL?TRAEFIK_8080_SSL not set}
+      # traefik.http.routers.dashboard-https.tls: true
+      # traefik.http.routers.dashboard-https.tls.certrosolver: ${TRAEFIK_8080_SSL?TRAEFIK_8080_SSL not set}
 
       #! EXTRAS
       #? Use the special Traefik service api@internal for the UI/Dashboard
@@ -77,3 +77,4 @@ services:
       #! ROUTER
       traefik.http.services.whoami.loadbalancer.server.port: 80
       traefik.http.routers.whoami.rule: Host(`${WHOAMI_DOMAIN?WHOAMI_DOMAIN not set}`)
+      
