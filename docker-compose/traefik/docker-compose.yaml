@@ -75,14 +75,4 @@ services:
     ports:
       - "80:80"
       - "443:443"
-
-  whoami:
-    image: traefik/whoami
-    labels: # auto-detects port 8000 in next line
-      #! NETWORK
-      traefik.enable: true
-      traefik.docker.network: traefik_default
-
-      #! ROUTER
-      traefik.http.services.whoami.loadbalancer.server.port: 80
-      traefik.http.routers.whoami.rule: Host(`${WHOAMI_DOMAIN?WHOAMI_DOMAIN not set}`)
+      
