@@ -49,15 +49,16 @@ services:
       traefik.docker.network: traefik_default
 
       #! ROUTER: [dashboard] 8080: Traefik API/Dashboard
-      traefik.http.services.dashboard.loadbalancer.server.port: 8080
       #? HTTP
+      traefik.http.services.dashboard-http.loadbalancer.server.port: 8080
       traefik.http.routers.dashboard-http.entrypoints: http
       traefik.http.routers.dashboard-http.rule: Host(`${TRAEFIK_8080_DOMAIN?TRAEFIK_8080_DOMAIN not set}`)
       #? HTTPS
+      traefik.http.services.dashboard-https.loadbalancer.server.port: 8080
       traefik.http.routers.dashboard-https.entrypoints: https
       traefik.http.routers.dashboard-https.rule: Host(`${TRAEFIK_8080_DOMAIN?TRAEFIK_8080_DOMAIN not set}`)
       #? SSL/TSL
-      traefik.http.routers.traefik-dashboard-https.tls: true
+      traefik.http.routers.dashboard-https.tls: true
       traefik.http.routers.dashboard-https.tls.certrosolver: ${TRAEFIK_8080_SSL?TRAEFIK_8080_SSL not set}
 
       #! EXTRAS
