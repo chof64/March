@@ -49,7 +49,7 @@ services:
       - traefik.http.routers.dashbaord-http.entrypoints=http
       - traefik.http.routers.dashboard-http.rule=Host(`${TRAEFIK_8080_DOMAIN?TRAEFIK_8080_DOMAIN not set}`)
       #* HTTPS
-      - traefik.http.routers.dashbaord-https.entrypoints=http
+      - traefik.http.routers.dashbaord-https.entrypoints=https
       - traefik.http.routers.dashboard-https.rule=Host(`${TRAEFIK_8080_DOMAIN?TRAEFIK_8080_DOMAIN not set}`)
       #* SSL/TLS
       - traefik.http.routers.dashboard-https.tls=true
