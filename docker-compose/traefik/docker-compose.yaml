@@ -38,6 +38,6 @@ services:
       - "80:80"
 
   whoami:
-    image: jwilder/whoami
+    image: traefik/whoami
     labels: # auto-detects port 8000 in next line
       traefik.http.routers.whoami.rule: Host(`${WHOAMI_8000_DOMAIN?WHOAMI_8000_DOMAIN not set}`)
