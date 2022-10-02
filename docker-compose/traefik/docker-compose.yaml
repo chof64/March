@@ -47,7 +47,8 @@ services:
       traefik.enable: true
 
       #! ROUTER: [dashboard] 8080: Traefik API/Dashboard
-      traefik.http.services.dashboard.loadbalancer.server.port: 8080
+      traefik.http.services.dashboard-http.loadbalancer.server.port: 8080
+      traefik.http.services.dashboard-https.loadbalancer.server.port: 8080
       #? HTTP
       traefik.http.routers.dashboard-http.entrypoints: http
       traefik.http.routers.dashboard-http.rule: Host(`${TRAEFIK_8080_DOMAIN?TRAEFIK_8080_DOMAIN not set}`)
