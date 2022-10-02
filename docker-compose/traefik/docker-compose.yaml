@@ -55,7 +55,7 @@ services:
       #? HTTPS
       traefik.http.routers.dashboard-https.entrypoints: https
       traefik.http.routers.dashboard-https.rule: Host(`${TRAEFIK_8080_DOMAIN?TRAEFIK_8080_DOMAIN not set}`)
-      #? SSL/TSL
+      #? SSL/TLS
       traefik.http.routers.dashboard-https.tls: true
       traefik.http.routers.dashboard-https.tls.certresolver: ${TRAEFIK_8080_SSL?TRAEFIK_8080_SSL not set}
 
@@ -75,4 +75,3 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      
