@@ -18,7 +18,7 @@ services:
       - --certificatesresolvers.prod-ssl.acme.tlschallenge=true
       - --certificatesresolvers.prod-ssl.acme.email=${SSL_EMAIL?SSL_EMAIL not set}
       #? [dev-ssl] Staging CA.
-      - --certificatesresolvers.dev-ssl.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
+      - --certificatesresolvers.dev-ssl.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
       - --certificatesresolvers.dev-ssl.acme.storage=/traefik/acme.json
       - --certificatesresolvers.dev-ssl.acme.tlschallenge=true
       - --certificatesresolvers.dev-ssl.acme.email=${SSL_EMAIL?SSL_EMAIL not set}
