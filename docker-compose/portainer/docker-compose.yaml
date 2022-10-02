@@ -9,16 +9,17 @@ services:
       traefik.docker.network: traefik-public
 
       #! ROUTER [dashboard] 9000/9443: Portainer Dashboard
-      traefik.http.services.dashboard.loadbalancer.server.port: 9443
       #? HTTP
-      ##traefik.http.routers.dashboard-http.entrypoints: http
-      # traefik.http.routers.dashboard-http.rule: Host(`${PORTAINER_9000_DOMAIN?PORTAINER_9000_DOMAIN not set}`)
+      traefik.http.services.portainer-dashboard-http.loadbalancer.server.port: 9000
+      traefik.http.routers.portainer-dashboard-http.entrypoints: http
+      traefik.http.routers.portainer-dashboard-http.rule: Host(`${PORTAINER_9000_DOMAIN?PORTAINER_9000_DOMAIN not set}`)
       #? HTTPS
-      traefik.http.routers.dashboard-https.entrypoints: https
-      traefik.http.routers.dashboard-https.rule: Host(`${PORTAINER_9000_DOMAIN?PORTAINER_9000_DOMAIN not set}`)
+      traefik.http.services.portainer-dashboard-https.loadbalancer.server.port: 9443
+      traefik.http.routers.portainer-dashboard-https.entrypoints: https
+      traefik.http.routers.portainer-dashboard-https.rule: Host(`${PORTAINER_9000_DOMAIN?PORTAINER_9000_DOMAIN not set}`)
       #? SSL/TLS
-      traefik.http.routers.dashboard-https.tls: true
-      traefik.http.routers.dashboard-https.tls.certresolver: letsencrypt
+      traefik.http.routers.portainer-dashboard-https.tls: true
+      traefik.http.routers.portainer-dashboard-https.tls.certresolver: letsencrypt
 
       #! ROUTER [endge] 8000: Portainer Edge Agent
       # traefik.http.services.edge-http.loadbalancer.server.port: 8000
@@ -31,6 +32,13 @@ services:
       #? SSL/TLS
       # traefik.http.routers.edge-https.tls: true
       # traefik.http.routers.edge-https.tls.certresolver: letsencrypt
+
+      #! MIDDLWARE
+      #? [dashboard] Redirect HTTP to HTTPS.
+      traefik.http.routers.portainer-dashboard-http.middlewares: https-redirect
+      traefik.http.middlewares.https-redirect.redirectscheme.scheme: https
+      traefik.http.middlewares.https-redirect.redirectscheme.permanent: true
+
     networks:
       - traefik-public
     restart: always
