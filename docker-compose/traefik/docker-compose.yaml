@@ -40,29 +40,29 @@ services:
       traefik.docker.network: traefik-public
 
       #! ROUTER: [dashboard] 8080: Traefik API/Dashboard
-      traefik.http.services.dashboard.loadbalancer.server.port: 8080
+      traefik.http.services.traefik-dashboard.loadbalancer.server.port: 8080
       #? HTTP
-      traefik.http.routers.dashboard-http.entrypoints: http
-      traefik.http.routers.dashboard-http.rule: Host(`${TRAEFIK_8080_DOMAIN?TRAEFIK_8080_DOMAIN not set}`)
+      traefik.http.routers.traefik-dashboard-http.entrypoints: http
+      traefik.http.routers.traefik-dashboard-http.rule: Host(`${TRAEFIK_8080_DOMAIN?TRAEFIK_8080_DOMAIN not set}`)
       #? HTTPS
-      traefik.http.routers.dashboard-https.entrypoints: https
-      traefik.http.routers.dashboard-https.rule: Host(`${TRAEFIK_8080_DOMAIN?TRAEFIK_8080_DOMAIN not set}`)
+      traefik.http.routers.traefik-dashboard-https.entrypoints: https
+      traefik.http.routers.traefik-dashboard-https.rule: Host(`${TRAEFIK_8080_DOMAIN?TRAEFIK_8080_DOMAIN not set}`)
       #? SSL/TLS
-      traefik.http.routers.dashboard-https.tls: true
-      traefik.http.routers.dashboard-https.tls.certresolver: letsencrypt
+      traefik.http.routers.traefik-dashboard-https.tls: true
+      traefik.http.routers.traefik-dashboard-https.tls.certresolver: letsencrypt
 
       #! MIDDLEWARE
       #? [dashboard] Redirect HTTP to HTTPS.
-      traefik.http.routers.dashboard-http.middlewares: https-redirect
+      traefik.http.routers.traefik-dashboard-http.middlewares: https-redirect
       traefik.http.middlewares.https-redirect.redirectscheme.scheme: https
       traefik.http.middlewares.https-redirect.redirectscheme.permanent: true
       #? [dashboard] Basic Auth.
-      traefik.http.routers.dashboard-https.middlewares: basic-auth
+      traefik.http.routers.traefik-dashboard-https.middlewares: basic-auth
       traefik.http.middlewares.basic-auth.basicauth.users: ${TRAEFIK_8080_AUTH?TRAEFIK_8080_AUTH not set}
 
       #! EXTRAS
       #? Use the special Traefik service api@internal for the UI/Dashboard
-      traefik.http.routers.dashboard.service: api@internal
+      traefik.http.routers.traefik-dashboard.service: api@internal
     networks:
       - traefik-public
     restart: always
