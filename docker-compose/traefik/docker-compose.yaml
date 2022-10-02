@@ -46,10 +46,10 @@ services:
     labels:
       #! NETWORK
       traefik.enable: true
+      traefik.docker.network: traefik_default
 
       #! ROUTER: [dashboard] 8080: Traefik API/Dashboard
-      traefik.http.services.dashboard-http.loadbalancer.server.port: 8080
-      traefik.http.services.dashboard-https.loadbalancer.server.port: 8080
+      traefik.http.services.dashboard.loadbalancer.server.port: 8080
       #? HTTP
       traefik.http.routers.dashboard-http.entrypoints: http
       traefik.http.routers.dashboard-http.rule: Host(`${TRAEFIK_8080_DOMAIN?TRAEFIK_8080_DOMAIN not set}`)
@@ -72,6 +72,7 @@ services:
     labels: # auto-detects port 8000 in next line
       #! NETWORK
       traefik.enable: true
+      traefik.docker.network: traefik_default
 
       #! ROUTER
       traefik.http.services.whoami.loadbalancer.server.port: 80
