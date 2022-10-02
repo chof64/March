@@ -2,7 +2,7 @@ version: "3.9"
 services:
   portainer:
     image: portainer/portainer-ce:latest
-    command: -H unix:///var/run/docker.sock
+    # command: -H unix:///var/run/docker.sock
     labels:
       #! NETWORK
       traefik.enable: true

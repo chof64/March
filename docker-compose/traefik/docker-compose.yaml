@@ -67,7 +67,7 @@ services:
       - traefik-public
     restart: always
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./data:/traefik
     ports:
       - "80:80"
