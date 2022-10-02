@@ -1,142 +1,123 @@
-version: "3"
+version: "3.9"
 services:
   traefik:
     image: traefik:v2.9
     command:
-      #! ENTRYPOINTS [80, 443]
+      #! ENTRYPOINT
       - --entrypoints.http.address=:80
       - --entrypoints.https.address=:443
-      
-      #! PROVIDERS [Docker]
+
+      #! PROVIDERS
       - --providers.docker
       - --providers.docker.exposedbydefault=false
 
-      #! SSL/TLS RESOLVER [Let's Encrypt]
-      #? Production CA Server
-      - --certificatesresolvers.prod-ssl.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
-      - --certificatesresolvers.prod-ssl.acme.storage=/traefik/acme.json
-      - --certificatesresolvers.prod-ssl.acme.dnschallenge=true
-      - --certificatesresolvers.prod-ssl.acme.dnschallenge.provider=cloudflare
-      - --certificatesresolvers.prod-ssl.acme.email=${PROD_SSL_EMAIL?PROD_SSL_EMAIL not set}
-      #? Staging/Development CA Server
-      - --certificatesresolvers.dev-ssl.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
-      - --certificatesresolvers.dev-ssl.acme.storage=/traefik/acme.json
-      - --certificatesresolvers.dev-ssl.acme.dnschallenge=true
-      - --certificatesresolvers.dev-ssl.acme.dnschallenge.provider=cloudflare
-      - --certificatesresolvers.dev-ssl.acme.email=${DEV_SSL_EMAIL?DEV_SSL_EMAIL not set}
-
-      #! DASHBOARD
-      - --api
-      #* - --api.dashboard=false  # Defaults: true
-      #* - --api.insecure=true  # Defaults: false
+      #! SSL/TLS Let's Encrypt
+      #? [letsencrypt] Production CA.
+      - --certificatesresolvers.letsencrypt.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
+      - --certificatesresolvers.letsencrypt.acme.storage=/traefik/acme.json
+      - --certificatesresolvers.letsencrypt.acme.tlschallenge=true
+      - --certificatesresolvers.letsencrypt.acme.email=${SSL_EMAIL?SSL_EMAIL not set}
 
       #! LOGGING
-      #? Access Logs
+      #? Access logs.
+      - --accesslog=true
+      - --accesslog.bufferingsize=100
       - --accesslog.filepath=/traefik/access.log
       - --accesslog.format=json
-      #? Error Logs
+      #? Error logs.
+      - --log=true
+      - --log.level=DEBUG
       - --log.filepath=/traefik/error.log
       - --log.format=json
 
-    environment:
-      - CF_API_EMAIL=${CF_API_EMAIL?CF_API_EMAIL not set}
-      - CF_API_KEY=${CF_API_KEY?CF_API_KEY not set}
-
+      #! DASHBOARD
+      - --api
+      - --api.dashboard=true
+      - --api.insecure=true # only remove if PRODUCTION SSL is used.
     labels:
-      #! Expose service to Traefik network.
-      - traefik.enable=true  # Defaults: false
-      - traefik.docker.network=traefik-public
+      #! NETWORK
+      traefik.enable: true
+      traefik.docker.network: traefik-public
 
-      #! ROUTER: 8080 [80, 443].
-      - traefik.http.services.traefik-dashboard.loadbalancer.server.port=8080
+      #! ROUTER: [dashboard] 8080: Traefik API/Dashboard
+      traefik.http.services.traefik-dashboard.loadbalancer.server.port: 8080
       #? HTTP
-      - traefik.http.routers.traefik-dashboard-http.entrypoints=http
-      - traefik.http.routers.traefik-dashboard-http.rule=Host(`${TRAEFIK_8080_HTTP?TRAEFIK_8080_HTTP not set}`)
+      traefik.http.routers.traefik-dashboard-http.entrypoints: http
+      traefik.http.routers.traefik-dashboard-http.rule: Host(`${TRAEFIK_8080_DOMAIN?TRAEFIK_8080_DOMAIN not set}`)
       #? HTTPS
-      - traefik.http.routers.traefik-dashboard-https.entrypoints=https
-      - traefik.http.routers.traefik-dashboard-https.rule=Host(`${TRAEFIK_8080_HTTPS?TRAEFIK_8080_HTTPS not set}`)
+      traefik.http.routers.traefik-dashboard-https.entrypoints: https
+      traefik.http.routers.traefik-dashboard-https.rule: Host(`${TRAEFIK_8080_DOMAIN?TRAEFIK_8080_DOMAIN not set}`)
       #? SSL/TLS
-      - traefik.http.routers.traefik-dashboard-https.tls=true  # Defaults: false
-      - traefik.http.routers.traefik-dashboard-https.tls.certresolver=${TRAEFIK_8080_SSL?TRAEFIK_8080_SSL not set}
+      traefik.http.routers.traefik-dashboard-https.tls: true
+      traefik.http.routers.traefik-dashboard-https.tls.certresolver: letsencrypt
 
       #! MIDDLEWARE
-      #? 8080: Redirect HTTP to HTTPS
-      - traefik.http.routers.traefik-dashboard-http.middlewares=redirect-to-https
-      - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
-      - traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true
-      #? 8080: Basic Auth
-      - traefik.http.routers.traefik-dashboard-https.middlewares=traefik-dashboard-basicauth
-      - traefik.http.middlewares.traefik-dashboard-basicauth.basicauth.users=${TRAEFIK_8080_AUTH_USERS?TRAEFIK_8080_AUTH_USERS not set}
+      #? [dashboard] Redirect HTTP to HTTPS.
+      traefik.http.routers.traefik-dashboard-http.middlewares: https-redirect
+      traefik.http.middlewares.https-redirect.redirectscheme.scheme: https
+      traefik.http.middlewares.https-redirect.redirectscheme.permanent: true
+      #? [dashboard] Basic Auth.
+      traefik.http.routers.traefik-dashboard-https.middlewares: basic-auth
+      traefik.http.middlewares.basic-auth.basicauth.users: ${TRAEFIK_8080_AUTH?TRAEFIK_8080_AUTH not set}
 
-      #! Traefik Dashboard
-      #? Use the special Traefik service api@internal with the web UI/Dashboard.
-      - traefik.http.routers.traefik-dashboard-https.service=api@internal
+      #! EXTRAS
+      #? Use the special Traefik service api@internal for the UI/Dashboard
+      traefik.http.routers.traefik-dashboard.service: api@internal
+    networks:
+      - traefik-public
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./data:/traefik
+    ports:
+      - "80:80"
+      - "443:443"
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    command: -H unix:///var/run/docker.sock
+    labels:
+      #! NETWORK
+      traefik.enable: true
+      traefik.docker.network: traefik-public
+
+      #! ROUTER [dashboard] 9000: Portainer Dashboard
+      #? HTTP
+      traefik.http.services.portainer-dashboard.loadbalancer.server.port: 9000
+      traefik.http.routers.portainer-dashboard-http.entrypoints: http
+      traefik.http.routers.portainer-dashboard-http.rule: Host(`${PORTAINER_9000_DOMAIN?PORTAINER_9000_DOMAIN not set}`)
+      #? HTTPS
+      traefik.http.routers.portainer-dashboard-https.entrypoints: https
+      traefik.http.routers.portainer-dashboard-https.rule: Host(`${PORTAINER_9000_DOMAIN?PORTAINER_9000_DOMAIN not set}`)
+      #? SSL/TLS
+      traefik.http.routers.portainer-dashboard-https.tls: true
+      traefik.http.routers.portainer-dashboard-https.tls.certresolver: letsencrypt
+
+      #! ROUTER [edge] 8000: Portainer Edge Agent
+      # traefik.http.services.portainer-edge-http.loadbalancer.server.port: 8000
+      #? HTTP
+      # traefik.http.routers.portainer-edge-http.entrypoints: http
+      # traefik.http.routers.portainer-edge-http.rule: Host(`${PORTAINER_8000_DOMAIN?PORTAINER_8000_DOMAIN not set}`)
+      #? HTTPS
+      # traefik.http.routers.portainer-edge-https.entrypoints: https
+      # traefik.http.routers.portainer-edge-https.rule: Host(`${PORTAINER_8000_DOMAIN?PORTAINER_8000_DOMAIN not set}`)
+      #? SSL/TLS
+      # traefik.http.routers.portainer-edge-https.tls: true
+      # traefik.http.routers.portainer-edge-https.tls.certresolver: letsencrypt
+
+      #! MIDDLWARE
+      #? [dashboard] Redirect HTTP to HTTPS.
+      traefik.http.routers.portainer-dashboard-http.middlewares: https-redirect
+      traefik.http.middlewares.https-redirect.redirectscheme.scheme: https
+      traefik.http.middlewares.https-redirect.redirectscheme.permanent: true
 
     networks:
       - traefik-public
-
-    restart: always
-
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./traefik:/traefik
-  
-    ports:
-      - 80:80
-      - 443:443
-
-  portainer:
-    image: portainer/portainer-ce:2.15.0
-    command: -H unix:///var/run/docker.sock
-    labels:
-      #! Expose service to Traefik network.
-      - traefik.enable=true  # Defaults: false
-      - traefik.docker.network=traefik-public
-
-      #! ROUTER: EDGE 8000 [80, 443].
-      - traefik.http.services.edge.loadbalancer.server.port=8000
-      #? HTTP
-      - traefik.http.routers.edge-http.entrypoints=http
-      - traefik.http.routers.edge-http.rule=Host(`${PORTAINER_8000_HTTP?PORTAINER_8000_HTTP not set}`)
-      #? HTTPS
-      - traefik.http.routers.edge-https.entrypoints=https
-      - traefik.http.routers.edge-https.rule=Host(`${PORTAINER_8000_HTTPS?PORTAINER_8000_HTTPS not set}`)
-      #? SSL/TLS
-      - traefik.http.routers.edge-https.tls=true  # Defaults: false
-      - traefik.http.routers.edge-https.tls.certresolver=${PORTAINER_8000_SSL?PORTAINER_8000_SSL not set}
-
-      #! ROUTER: 9000 [80, 443].
-      - traefik.http.services.frontend-http.loadbalancer.server.port=9000
-      - traefik.http.services.frontend-https.loadbalancer.server.port=9443
-      #? HTTP
-      - traefik.http.routers.frontend-http.entrypoints=http
-      - traefik.http.routers.frontend-http.rule=Host(`${PORTAINER_9000_HTTP?PORTAINER_9000_HTTP not set}`)
-      #? HTTPS
-      - traefik.http.routers.frontend-https.entrypoints=https
-      - traefik.http.routers.frontend-https.rule=Host(`${PORTAINER_9000_HTTPS?PORTAINER_9000_HTTPS not set}`)
-      #? SSL/TLS
-      - traefik.http.routers.frontend-https.tls=true  # Defaults: false
-      - traefik.http.routers.frontend-https.tls.certresolver=${PORTAINER_9000_SSL?PORTAINER_9000_SSL not set}
-
-      #! MIDDLEWARE
-      #? 8000: Redirect HTTP to HTTPS
-      - traefik.http.routers.edge-http.middlewares=edge-to-https
-      - traefik.http.middlewares.edge-to-https.redirectscheme.scheme=https
-      - traefik.http.middlewares.edge-to-https.redirectscheme.permanent=true
-      #? 9000: Redirect HTTP to HTTPS
-      - traefik.http.routers.frontend-http.middlewares=frontend-to-https
-      - traefik.http.middlewares.frontend-to-https.redirectscheme.scheme=https
-      - traefik.http.middlewares.frontend-to-https.redirectscheme.permanent=true
-      #? 9000: Basic Auth
-      - traefik.http.routers.frontend-https.middlewares=frontend-basicauth
-      - traefik.http.middlewares.frontend-basicauth.basicauth.users=${PORTAINER_9000_AUTH_USERS?PORTAINER_9000_AUTH_USERS not set}
-
     restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./portainer:/data
+      - ./data:/data
 
 networks:
-  # Run `docker network create traefik-public` before starting the stack
   traefik-public:
     external: true

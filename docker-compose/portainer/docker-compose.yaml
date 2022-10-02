@@ -2,36 +2,35 @@ version: "3.9"
 services:
   portainer:
     image: portainer/portainer-ce:latest
-    # command: -H unix:///var/run/docker.sock
+    command: -H unix:///var/run/docker.sock
     labels:
       #! NETWORK
       traefik.enable: true
       traefik.docker.network: traefik-public
 
-      #! ROUTER [dashboard] 9000/9443: Portainer Dashboard
+      #! ROUTER [dashboard] 9000: Portainer Dashboard
       #? HTTP
-      traefik.http.services.portainer-dashboard-http.loadbalancer.server.port: 9000
+      traefik.http.services.portainer-dashboard.loadbalancer.server.port: 9000
       traefik.http.routers.portainer-dashboard-http.entrypoints: http
       traefik.http.routers.portainer-dashboard-http.rule: Host(`${PORTAINER_9000_DOMAIN?PORTAINER_9000_DOMAIN not set}`)
       #? HTTPS
-      traefik.http.services.portainer-dashboard-https.loadbalancer.server.port: 9443
       traefik.http.routers.portainer-dashboard-https.entrypoints: https
       traefik.http.routers.portainer-dashboard-https.rule: Host(`${PORTAINER_9000_DOMAIN?PORTAINER_9000_DOMAIN not set}`)
       #? SSL/TLS
       traefik.http.routers.portainer-dashboard-https.tls: true
       traefik.http.routers.portainer-dashboard-https.tls.certresolver: letsencrypt
 
-      #! ROUTER [endge] 8000: Portainer Edge Agent
-      # traefik.http.services.edge-http.loadbalancer.server.port: 8000
+      #! ROUTER [edge] 8000: Portainer Edge Agent
+      # traefik.http.services.portainer-edge-http.loadbalancer.server.port: 8000
       #? HTTP
-      # traefik.http.routers.edge-http.entrypoints: http
-      # traefik.http.routers.edge-http.rule: Host(`${PORTAINER_8000_DOMAIN?PORTAINER_8000_DOMAIN not set}`)
+      # traefik.http.routers.portainer-edge-http.entrypoints: http
+      # traefik.http.routers.portainer-edge-http.rule: Host(`${PORTAINER_8000_DOMAIN?PORTAINER_8000_DOMAIN not set}`)
       #? HTTPS
-      # traefik.http.routers.edge-https.entrypoints: https
-      # traefik.http.routers.edge-https.rule: Host(`${PORTAINER_8000_DOMAIN?PORTAINER_8000_DOMAIN not set}`)
+      # traefik.http.routers.portainer-edge-https.entrypoints: https
+      # traefik.http.routers.portainer-edge-https.rule: Host(`${PORTAINER_8000_DOMAIN?PORTAINER_8000_DOMAIN not set}`)
       #? SSL/TLS
-      # traefik.http.routers.edge-https.tls: true
-      # traefik.http.routers.edge-https.tls.certresolver: letsencrypt
+      # traefik.http.routers.portainer-edge-https.tls: true
+      # traefik.http.routers.portainer-edge-https.tls.certresolver: letsencrypt
 
       #! MIDDLWARE
       #? [dashboard] Redirect HTTP to HTTPS.
