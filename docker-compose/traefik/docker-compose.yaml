@@ -64,6 +64,10 @@ services:
       traefik.http.routers.dashboard-http.middlewares: https-redirect
       traefik.http.middlewares.https-redirect.redirectscheme.scheme: https
       traefik.http.middlewares.https-redirect.redirectscheme.permanent: true
+      #? [dashboard] Basic Auth.
+      traefik.http.routers.dashboard-https.middlewares: basic-auth
+      traefik.http.middlewares.basic-auth.basicauth.users: ${TRAEFIK_8080_AUTH?TRAEFIK_8080_AUTH not set}
+      
 
       #! EXTRAS
       #? Use the special Traefik service api@internal for the UI/Dashboard
