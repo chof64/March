@@ -61,7 +61,7 @@ services:
 
       #! MIDDLEWARE
       #? [dashboard] Redirect HTTP to HTTPS.
-      traefik.http.routers.dashboard-http.middlewares: redirect-to-https
+      traefik.http.routers.dashboard-http.middlewares: https-redirect
       traefik.http.middlewares.https-redirect.redirectscheme.scheme: https
       traefik.http.middlewares.https-redirect.redirectscheme.permanent: true
 
