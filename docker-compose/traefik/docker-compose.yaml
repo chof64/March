@@ -3,15 +3,28 @@ services:
   traefik:
     image: traefik:v2.9
     command:
-      # ENTRYPOINT
+      #! ENTRYPOINT
       - --entrypoints.http.address=:80
-      # - --entrypoints.https.address=:443
+      - --entrypoints.https.address=:443
 
-      # PROVIDERS
+      #! PROVIDERS
       - --providers.docker
       - --providers.docker.exposedbydefault=false
 
-      # LOGGING
+      #! SSL/TLS Let's Encrypt
+      #? [prod-ssl] Production CA.
+      - --certificatesresolvers.prod-ssl.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
+      - --certificatesresolvers.prod-ssl.acme.storage=/traefik/acme.json
+      - --certificatesresolvers.prod-ssl.acme.tlschallenge=true
+      - --certificatesresolvers.prod-ssl.acme.email=${SSL_EMAIL?SSL_EMAIL not set}
+      #? [dev-ssl] Staging CA.
+      - --certificatesresolvers.dev-ssl.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
+      - --certificatesresolvers.dev-ssl.acme.storage=/traefik/acme.json
+      - --certificatesresolvers.dev-ssl.acme.tlschallenge=true
+      - --certificatesresolvers.dev-ssl.acme.email=${SSL_EMAIL?SSL_EMAIL not set}
+
+
+      #! LOGGING
       #? Access logs.
       - --accesslog=true
       - --accesslog.bufferingsize=100
@@ -23,7 +36,7 @@ services:
       - --log.filepath=/traefik/error.log
       - --log.format=json
 
-      # DASHBOARD
+      #! DASHBOARD
       - --api
       - --api.insecure=true
     volumes:
@@ -33,16 +46,24 @@ services:
       #! NETWORK
       traefik.enable: true
 
-      #! ROUTER
-      # [dashboard] 8080: Traefik API/Dashboard
-      traefik.http.routers.dashboard.rule: Host(`${TRAEFIK_8080_DOMAIN?TRAEFIK_8080_DOMAIN not set}`)
+      #! ROUTER: [dashboard] 8080: Traefik API/Dashboard
+      traefik.http.services.dashboard.loadbalancer.server.port: 8080
+      #? HTTP
+      traefik.http.routers.dashboard-http.entrypoints: http
+      traefik.http.routers.dashboard-http.rule: Host(`${TRAEFIK_8080_DOMAIN?TRAEFIK_8080_DOMAIN not set}`)
+      #? HTTPS
+      traefik.http.routers.dashboard-https.entrypoints: https
+      traefik.http.routers.dashboard-https.rule: Host(`${TRAEFIK_8080_DOMAIN?TRAEFIK_8080_DOMAIN not set}`)
+      #? SSL/TSL
+      traefik.http.routers.traefik-dashboard-https.tls: true
+      traefik.http.routers.dashboard-https.tls.certrosolver: ${TRAEFIK_8080_SSL?TRAEFIK_8080_SSL not set}
 
       #! EXTRAS
       #? Use the special Traefik service api@internal for the UI/Dashboard
       traefik.http.routers.dashboard.service: api@internal
     ports:
       - "80:80"
-      # - "443:443"
+      - "443:443"
 
   whoami:
     image: traefik/whoami
