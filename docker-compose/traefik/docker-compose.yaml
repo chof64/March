@@ -12,16 +12,11 @@ services:
       - --providers.docker.exposedbydefault=false
 
       #! SSL/TLS Let's Encrypt
-      #? [prod-ssl] Production CA.
-      - --certificatesresolvers.prod-ssl.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
-      - --certificatesresolvers.prod-ssl.acme.storage=/traefik/acme.json
-      - --certificatesresolvers.prod-ssl.acme.tlschallenge=true
-      - --certificatesresolvers.prod-ssl.acme.email=${SSL_EMAIL?SSL_EMAIL not set}
-      #? [dev-ssl] Staging CA.
-      - --certificatesresolvers.dev-ssl.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
-      - --certificatesresolvers.dev-ssl.acme.storage=/traefik/acme.json
-      - --certificatesresolvers.dev-ssl.acme.tlschallenge=true
-      - --certificatesresolvers.dev-ssl.acme.email=${SSL_EMAIL?SSL_EMAIL not set}
+      #? [letsencrypt] Production CA.
+      - --certificatesresolvers.letsencrypt.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
+      - --certificatesresolvers.letsencrypt.acme.storage=/traefik/acme.json
+      - --certificatesresolvers.letsencrypt.acme.tlschallenge=true
+      - --certificatesresolvers.letsencrypt.acme.email=${SSL_EMAIL?SSL_EMAIL not set}
 
       #! LOGGING
       #? Access logs.
@@ -57,7 +52,7 @@ services:
       traefik.http.routers.dashboard-https.rule: Host(`${TRAEFIK_8080_DOMAIN?TRAEFIK_8080_DOMAIN not set}`)
       #? SSL/TLS
       traefik.http.routers.dashboard-https.tls: true
-      traefik.http.routers.dashboard-https.tls.certresolver: ${TRAEFIK_8080_SSL?TRAEFIK_8080_SSL not set}
+      traefik.http.routers.dashboard-https.tls.certresolver: letsencrypt
 
       #! MIDDLEWARE
       #? [dashboard] Redirect HTTP to HTTPS.
