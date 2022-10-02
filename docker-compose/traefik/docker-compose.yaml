@@ -45,7 +45,7 @@ services:
     labels:
       #! NETWORK
       traefik.enable: true
-      traefik.docker.network: traefik_default
+      traefik.docker.network: traefik-public
 
       #! ROUTER: [dashboard] 8080: Traefik API/Dashboard
       traefik.http.services.dashboard.loadbalancer.server.port: 8080
@@ -68,10 +68,15 @@ services:
       traefik.http.routers.dashboard-https.middlewares: basic-auth
       traefik.http.middlewares.basic-auth.basicauth.users: ${TRAEFIK_8080_AUTH?TRAEFIK_8080_AUTH not set}
 
-
       #! EXTRAS
       #? Use the special Traefik service api@internal for the UI/Dashboard
       traefik.http.routers.dashboard.service: api@internal
+    networks:
+      - traefik-public
     ports:
       - "80:80"
       - "443:443"
+
+networks:
+  traefik-public:
+    external: true
