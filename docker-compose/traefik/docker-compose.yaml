@@ -34,9 +34,6 @@ services:
       - --api
       - --api.dashboard=true
       - --api.insecure=true # only remove if PRODUCTION SSL is used.
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./data:/traefik
     labels:
       #! NETWORK
       traefik.enable: true
@@ -68,6 +65,10 @@ services:
       traefik.http.routers.dashboard.service: api@internal
     networks:
       - traefik-public
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data:/traefik
     ports:
       - "80:80"
       - "443:443"
