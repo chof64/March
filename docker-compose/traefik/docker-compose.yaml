@@ -23,7 +23,6 @@ services:
       - --certificatesresolvers.dev-ssl.acme.tlschallenge=true
       - --certificatesresolvers.dev-ssl.acme.email=${SSL_EMAIL?SSL_EMAIL not set}
 
-
       #! LOGGING
       #? Access logs.
       - --accesslog=true
@@ -51,7 +50,7 @@ services:
       #! ROUTER: [dashboard] 8080: Traefik API/Dashboard
       traefik.http.services.dashboard.loadbalancer.server.port: 8080
       #? HTTP
-      # traefik.http.routers.dashboard-http.entrypoints: http
+      traefik.http.routers.dashboard-http.entrypoints: http
       traefik.http.routers.dashboard-http.rule: Host(`${TRAEFIK_8080_DOMAIN?TRAEFIK_8080_DOMAIN not set}`)
       #? HTTPS
       # traefik.http.routers.dashboard-https.entrypoints: https
