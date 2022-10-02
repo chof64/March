@@ -9,12 +9,11 @@ services:
       traefik.docker.network: traefik-public
 
       #! ROUTER [dashboard] 9000/9443: Portainer Dashboard
+      traefik.http.services.dashboard.loadbalancer.server.port: 9000
       #? HTTP
-      traefik.http.services.dashboard-http.loadbalancer.server.port: 9000
       traefik.http.routers.dashboard-http.entrypoints: http
       traefik.http.routers.dashboard-http.rule: Host(`${PORTAINER_9000_DOMAIN?PORTAINER_9000_DOMAIN not set}`)
       #? HTTPS
-      traefik.http.services.dashboard-https.loadbalancer.server.port: 9443
       traefik.http.routers.dashboard-https.entrypoints: https
       traefik.http.routers.dashboard-https.rule: Host(`${PORTAINER_9000_DOMAIN?PORTAINER_9000_DOMAIN not set}`)
       #? SSL/TLS
