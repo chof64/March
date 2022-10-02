@@ -41,7 +41,7 @@ services:
       # ENABLE REVERSE-PROXY
       - traefik.enable=true
       - traefik.docker.network=traefik-public
-      
+
       # ROUTERS
       #! [dashboard] 8080: Traefik API/Dashboard.
       - traefik.http.services.dashboard.loadbalancer.server.port=8080
@@ -61,12 +61,12 @@ services:
       - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
       - traefik.http.routers.dashboard-http.middlewares=https-redirect
       #! BASIC AUTH: Traefik API/Dashboard.
-      - traefik.http.middlewares.dashbaord-auth.basicauth.users=${TRAEFIK_AUTH_USERNAME?TRAEFIK_AUTH_USERNAME not set}:${TRAEFIK_AUTH_HASHED_PASSWORD?TRAEFIK_AUTH_HASHED_PASSWORD not set}
+      - traefik.http.middlewares.dashbaord-auth.basicauth.users=${TRAEFIK_8080_AUTH_USERS?TRAEFIK_8080_AUTH_USERS not set}
       - traefik.http.routers.dashboard-https.middlewares=dashbaord-auth
 
       #* Use the special Traefik service api@internal with the web UI/Dashboard
       - traefik.http.routers.traefik-dashboard-https.service=api@internal
-    
+
     networks:
       - traefik-public
 
