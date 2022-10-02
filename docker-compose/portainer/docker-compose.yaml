@@ -1,0 +1,43 @@
+version: "3.9"
+services:
+  portainer:
+    image: portainer/portainer-ce:latest
+    command: -H unix:///var/run/docker.sock
+    labels:
+      #! NETWORK
+      traefik.enable: true
+      traefik.docker.network: traefik-public
+
+      #! ROUTER [dashboard] 9000/9443: Portainer Dashboard
+      #? HTTP
+      traefik.http.services.dashboard-http.loadbalancer.server.port: 9000
+      traefik.http.routers.dashboard-http.entrypoints: http
+      traefik.http.routers.dashboard-http.rule: Host(`${PORTAINER_9000_DOMAIN?PORTAINER_9000_DOMAIN not set}`)
+      #? HTTPS
+      traefik.http.services.dashboard-https.loadbalancer.server.port: 9443
+      traefik.http.routers.dashboard-https.entrypoints: https
+      traefik.http.routers.dashboard-https.rule: Host(`${PORTAINER_9000_DOMAIN?PORTAINER_9000_DOMAIN not set}`)
+      #? SSL/TLS
+      traefik.http.routers.dashboard-https.tls: true
+      traefik.http.routers.dashboard-https.tls.certresolver: letsencrypt
+
+      #! ROUTER [endge] 8000: Portainer Edge Agent
+      traefik.http.services.edge-http.loadbalancer.server.port: 8000
+      #? HTTP
+      traefik.http.routers.edge-http.entrypoints: http
+      traefik.http.routers.edge-http.rule: Host(`${PORTAINER_8000_DOMAIN?PORTAINER_8000_DOMAIN not set}`)
+      #? HTTPS
+      traefik.http.routers.edge-https.entrypoints: https
+      traefik.http.routers.edge-https.rule: Host(`${PORTAINER_8000_DOMAIN?PORTAINER_8000_DOMAIN not set}`)
+      #? SSL/TLS
+      traefik.http.routers.edge-https.tls: true
+      traefik.http.routers.edge-https.tls.certresolver: letsencrypt
+    networks:
+      - traefik-public
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data:/data
+networks:
+  traefik-public:
+    external: true
