@@ -38,7 +38,7 @@ services:
       #! DASHBOARD
       - --api
       - --api.dashboard=true
-      - --api.insecure=true
+      # - --api.insecure=true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./data:/traefik
@@ -67,7 +67,7 @@ services:
       #? [dashboard] Basic Auth.
       traefik.http.routers.dashboard-https.middlewares: basic-auth
       traefik.http.middlewares.basic-auth.basicauth.users: ${TRAEFIK_8080_AUTH?TRAEFIK_8080_AUTH not set}
-      
+
 
       #! EXTRAS
       #? Use the special Traefik service api@internal for the UI/Dashboard
