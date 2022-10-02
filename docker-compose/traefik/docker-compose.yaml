@@ -1,84 +1,43 @@
-version: "3"
+version: "3.9"
 services:
   traefik:
     image: traefik:v2.9
     command:
-      # API/DASHBOARD
+      # DASHBOARD
       - --api
-      - --api.dashboard=true
-
-      # ENTRYPOINTS
+      - --api.insecure=true
+      
+      # ENTRYPOINT
       - --entrypoints.http.address=:80
-      - --entrypoints.https.address=:443
+      # - --entrypoints.https.address=:443
 
       # PROVIDERS
       - --providers.docker
-      - --providers.docker.exposedbydefault=false
-
-      # SSL/TLS CERTIFICATE AUTHORITY
-      #? Production CA.
-      - --certificatesresolvers.prod-ssl.acme.email=${PROD_SSL_EMAIL?PROD_SSL_EMAIL not set}
-      - --certificatesresolvers.prod-ssl.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
-      - --certificatesresolvers.prod-ssl.acme.storage=/traefik/acme.json
-      - --certificatesresolvers.prod-ssl.acme.tlschallenge=true
-      #? Staging/Development CA.
-      - --certificatesresolvers.dev-ssl.acme.email=${DEV_SSL_EMAIL?DEV_SSL_EMAIL not set}
-      - --certificatesresolvers.dev-ssl.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
-      - --certificatesresolvers.dev-ssl.acme.storage=/traefik/acme.json
-      - --certificatesresolvers.dev-ssl.acme.tlschallenge=true
 
       # LOGGING
       #? Access logs.
-      - --accesslog.filePath=/traefik/logs/access.log
+      - --accesslog=true
+      - --accesslog.bufferingsize=100
+      - --accesslog.filepath=/traefik/access.log
       - --accesslog.format=json
-      - --accesslog.bufferingsize=50
       #? Error logs.
-      - --log.filePath=/traefik/logs/error.log
-      - --log.format=json
+      - --log=true
       - --log.level=DEBUG
-
-    labels:
-      # ENABLE REVERSE-PROXY
-      - traefik.enable=true
-      - traefik.docker.network=traefik-public
-
-      # ROUTERS
-      #! [dashboard] 8080: Traefik API/Dashboard.
-      - traefik.http.services.dashboard.loadbalancer.server.port=8080
-      #* HTTP
-      - traefik.http.routers.dashbaord-http.entrypoints=http
-      - traefik.http.routers.dashboard-http.rule=Host(`${TRAEFIK_8080_DOMAIN?TRAEFIK_8080_DOMAIN not set}`)
-      #* HTTPS
-      - traefik.http.routers.dashbaord-https.entrypoints=https
-      - traefik.http.routers.dashboard-https.rule=Host(`${TRAEFIK_8080_DOMAIN?TRAEFIK_8080_DOMAIN not set}`)
-      #* SSL/TLS
-      - traefik.http.routers.dashboard-https.tls=true
-      - traefik.http.routers.dashboard-https.tls.certresolver=${TRAEFIK_8080_CA?TRAEFIK_8080_CA not set}
-
-      # MIDDLEWARE
-      #! REDIRECTION: HTTP to HTTPS.
-      - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
-      - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
-      - traefik.http.routers.dashboard-http.middlewares=https-redirect
-      #! BASIC AUTH: Traefik API/Dashboard.
-      - traefik.http.middlewares.dashbaord-auth.basicauth.users=${TRAEFIK_8080_AUTH_USERS?TRAEFIK_8080_AUTH_USERS not set}
-      - traefik.http.routers.dashboard-https.middlewares=dashbaord-auth
-
-      #* Use the special Traefik service api@internal with the web UI/Dashboard
-      - traefik.http.routers.traefik-dashboard-https.service=api@internal
-
-    networks:
-      - traefik-public
-
-    restart: always
+      - --log.filepath=/traefik/error.log
+      - --log.format=json
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/run/docker.sock:/var/run/docker.sock
       - ./data:/traefik
-    ports:
-      - 80:80
-      - 443:443
+    labels:
+    # ROUTER
+    # [dashboard] 8080: Traefik API/Dashboard
+      traefik.http.routers.dashboard.rule: Host(`${TRAEFIK_8080_DOMAIN?TRAEFIK_8080_DOMAIN not set}`)
 
-networks:
-  # Run `docker network create traefik-public` to create this network.
-  traefik-public:
-    external: true
+      traefik.http.routers.dash.service: api@internal
+    ports:
+      - "80:80"
+
+  whoami:
+    image: jwilder/whoami
+    labels: # auto-detects port 8000 in next line
+      traefik.http.routers.whoami.rule: Host(`${WHOAMI_8000_DOMAIN?WHOAMI_8000_DOMAIN not set}`)
