@@ -59,6 +59,12 @@ services:
       traefik.http.routers.dashboard-https.tls: true
       traefik.http.routers.dashboard-https.tls.certresolver: ${TRAEFIK_8080_SSL?TRAEFIK_8080_SSL not set}
 
+      #! MIDDLEWARE
+      #? [dashboard] Redirect HTTP to HTTPS.
+      traefik.http.routers.dashboard-http.middlewares: redirect-to-https
+      traefik.http.middlewares.https-redirect.redirectscheme.scheme: https
+      traefik.http.middlewares.https-redirect.redirectscheme.permanent: true
+
       #! EXTRAS
       #? Use the special Traefik service api@internal for the UI/Dashboard
       traefik.http.routers.dashboard-https.service: api@internal
